@@ -35,7 +35,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    loadChatItems();
+    login();
+    
 
 });
 
@@ -87,38 +88,101 @@ function getBotResponse(message) {
     return "This is a bot response.";
 }
 
-
+/*
 function loadChatItems() {
-    fetch('/api/chats')
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error('Error loading chats:', data.error);
-                return;
-            }
+    console.log('Fetching chat items...');
+    fetch('https://839d-34-83-4-55.ngrok-free.app/api/chats', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        console.log('Chats response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+            console.error('Error loading chats:', data.error);
+            return;
+        }
 
-            const chats = data.chats;
-            const menuItemsContainer = document.getElementById('menu-items');
+        console.log('Chats data:', data);
+        const chats = data.chats;
+        const menuItemsContainer = document.getElementById('menu-items');
 
-            chats.forEach(chat => {
-                const chatButton = document.createElement('button');
-                chatButton.classList.add('menu-item');
-                chatButton.textContent = chat.firstPrompt || 'Untitled Chat';
-                chatButton.dataset.chatId = chat.chatId;
+        chats.forEach(chat => {
+            const chatButton = document.createElement('button');
+            chatButton.classList.add('menu-item');
+            chatButton.textContent = chat.firstPrompt || 'Untitled Chat';
+            chatButton.dataset.chatId = chat.chatId;
 
-                chatButton.addEventListener('click', function () {
-                    loadChatHistory(chat.chatId);
-                });
-
-                menuItemsContainer.appendChild(chatButton);
+            chatButton.addEventListener('click', function () {
+                loadChatHistory(chat.chatId);
             });
-        })
-        .catch(error => {
-            console.error('Error fetching chats:', error);
+
+            menuItemsContainer.appendChild(chatButton);
         });
+    })
+    .catch(error => {
+        console.error('Error fetching chats:', error);
+        fetch('https://839d-34-83-4-55.ngrok-free.app/api/chats', {  // Pastikan URL ngrok yang benar
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
+        .then(response => response.text())
+        .then(text => console.log('Server response:', text))
+        .catch(error => console.error('Error fetching response text:', error));
+    });
 }
 
 function loadChatHistory(chatId) {
     // Implement the function to load chat history based on chatId
     console.log('Loading chat history for chatId:', chatId);
 }
+
+
+function login() {
+    const loginData = {
+        email: "evan@gmail.com",
+        password: "1234"
+    };
+
+    fetch('https://839d-34-83-4-55.ngrok-free.app/api/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginData),
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+            console.error('Login error:', data.error);
+            return;
+        }
+
+        // Save token or session information here if needed
+        console.log('Login successful:', data);
+
+        loadChatItems();
+    })
+    .catch(error => {
+        console.error('Error during login:', error);
+    });
+}
+
+*/

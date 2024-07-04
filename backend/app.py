@@ -2,7 +2,7 @@ import os
 from pyngrok import ngrok
 from urllib.request import urlopen
 from flask import Flask
-from flask import jsonify, request, session
+from flask import render_template, jsonify, request, session
 from dotenv import find_dotenv, dotenv_values
 from controllers.login import login_blueprint
 from controllers.register import register_blueprint
@@ -22,6 +22,12 @@ app.register_blueprint(login_blueprint)
 app.register_blueprint(register_blueprint)
 app.register_blueprint(manage_profile_blueprint)
 app.register_blueprint(logout_blueprint)
+
+
+@app.route('/chatpage')
+def homepage():
+    return render_template('chat-page.html')
+
 
 @app.route('/api/query', methods=['POST'])
 def api_query():
