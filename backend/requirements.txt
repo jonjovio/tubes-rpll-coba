@@ -7,10 +7,10 @@ urllib3==1.26.15
 llama-index-llms-gemini
 llama-index
 llama-index-vector-stores-mongodb
-llama-index-embeddings-google
+llama-index-embeddings-huggingface
 
 ## Utils
-flask
+Flask
 pyngrok
 ipykernel
 ipython

@@ -62,9 +62,7 @@ function appendMessage(sender, message) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message', sender);
 
-    const userImage = chatBox.getAttribute('data-user-img');
-    const botImage = chatBox.getAttribute('data-bot-img');
-    const profilePic = sender === 'user' ? userImage : botImage;
+    const profilePic = sender === 'user' ? '../img/male.png' : '../img/dog.png';
 
     if (sender == 'bot') {
         messageElement.innerHTML = `

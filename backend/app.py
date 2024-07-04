@@ -6,7 +6,7 @@ from flask import render_template, jsonify, request, session
 from dotenv import find_dotenv, dotenv_values
 from controllers.login import login_blueprint
 from controllers.register import register_blueprint
-from controllers.database import initialize, get_users_db, get_user_profile_data
+from controllers.database import DatabaseFactory, get_user_profile_data, initialize
 from controllers.manage_profile import manage_profile_blueprint
 from controllers.logout import logout_blueprint
 from controllers.chats import chats_blueprint, get_chat_prompts
@@ -24,9 +24,18 @@ app.register_blueprint(manage_profile_blueprint)
 app.register_blueprint(logout_blueprint)
 
 
+@app.route('/registerpage')
+def registerpage():
+    return render_template('register.html')
+
+@app.route('/loginpage')
+def loginpage():
+    return render_template('login.html')
+
 @app.route('/chatpage')
-def homepage():
-    return render_template('chat-page.html')
+def chatpage():
+    chat_list, status_code = get_chats()
+    return render_template('chat-page.html', chats=chat_list)
 
 
 @app.route('/api/query', methods=['POST'])
@@ -67,9 +76,11 @@ def get_prompts(chat_id):
 if __name__ == '__main__':
     ip = urlopen('https://api.ipify.org').read().decode('utf-8')
     print(f"My public IP is '{ip}'. Make sure this IP is allowed to connect to cloud Atlas")
+
     mongodb_client = initialize(config.get('ATLAS_URI'))
     setup_llm(config.get('GOOGLE_API_KEY'))
     connect_llm(mongodb_client)
+
     public_url = ngrok.connect(5000).public_url
     print(f"ngrok tunnel opened at {public_url}")
     app.run(debug=False)
