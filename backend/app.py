@@ -9,7 +9,7 @@ from controllers.register import register_blueprint
 from controllers.database import DatabaseFactory, get_user_profile_data, initialize
 from controllers.manage_profile import manage_profile_blueprint
 from controllers.logout import logout_blueprint
-from controllers.chats import chats_blueprint, get_chat_prompts
+from controllers.chats import chats_blueprint, get_chat_prompts, get_chats
 from controllers.llm_config import setup_llm, connect_llm, run_query
 
 app = Flask(__name__)
@@ -35,10 +35,28 @@ def loginpage():
 @app.route('/chatpage')
 def chatpage():
     chat_list, status_code = get_chats()
+
     return render_template('chat-page.html', chats=chat_list)
 
+@app.route('/chatpage/<chat_id>')
+def chatpage_with_id(chat_id):
+    chat_list, status_code = get_chats()
+    prompts_data, prompts_status_code = get_chat_prompts(chat_id)
+    print(prompts_data)
+    if prompts_status_code == 200 and prompts_data is not None:
+        return render_template('chat-page-with-id.html', chats=chat_list, chat_id=chat_id, messages=prompts_data)
+    else:
+        return render_template('chat-page-with-id.html', chats=chat_list, chat_id=chat_id, messages=[])
 
-@app.route('/api/query', methods=['POST'])
+@app.route('/log', methods=['POST'])
+def log_message():
+    data = request.get_json()
+    message = data.get('message', 'No message provided')
+    print(f"Client log: {message}")
+    return jsonify({'status': 'success'}), 200
+
+
+@app.route('/query', methods=['POST'])
 def api_query():
     try:
         user_id = session.get('user_id')
@@ -52,12 +70,15 @@ def api_query():
             return jsonify({'error': 'Missing "query" parameter'}), 400
 
         response = run_query(query_text, user_id, chat_id) 
-        return jsonify({'response': str(response)})
+        print("Response from run_query:", response) 
+        return jsonify(response)
 
     except Exception as e:
+        print(f"Error in api_query: {str(e)}")
         return jsonify({'error': str(e)}), 500
+    
 
-@app.route('/api/profile', methods=['GET'])
+@app.route('/profile', methods=['GET'])
 def get_profile():
     profile_data, status_code = get_user_profile_data()
     if status_code == 200:
@@ -65,19 +86,19 @@ def get_profile():
     else:
         return profile_data, status_code
 
-@app.route('/api/<chat_id>/prompts', methods=['GET'])
+@app.route('/<chat_id>/prompts', methods=['GET'])
 def get_prompts(chat_id):
     prompts_data, status_code = get_chat_prompts(chat_id)
     if status_code == 200:
         return jsonify(prompts_data), 200
     else:
-        return prompts_data, status_code
+        return jsonify(prompts_data), status_code
 
 if __name__ == '__main__':
     ip = urlopen('https://api.ipify.org').read().decode('utf-8')
     print(f"My public IP is '{ip}'. Make sure this IP is allowed to connect to cloud Atlas")
 
-    mongodb_client = initialize(config.get('ATLAS_URI'))
+    mongodb_client = initialize()
     setup_llm(config.get('GOOGLE_API_KEY'))
     connect_llm(mongodb_client)
 

@@ -13,8 +13,15 @@
                 <span>☰</span>
             </div>
             <div class="menu-items" id="menu-items">
-                <button class="menu-item new-chat">New Chat</button>
-                <button class="menu-item"></button>
+                <button onclick="window.location.href='/chatpage'" class="menu-item new-chat">New Chat</button>
+                {% for chat in chats %}
+                <div class="menu-item-container">
+                    <button onclick="window.location.href='/chatpage/{{ chat.chatId }}'" class="menu-item" data-chat-id="{{ chat.chatId }}">
+                        {{ chat.firstPrompt }}
+                    </button>
+                    <span class="trash-icon" onclick="deleteChat('{{ chat.chatId }}')">🗑️</span>
+                </div>
+                {% endfor %}
                 
             </div>
 
@@ -28,12 +35,15 @@
             </div>
         </div>
         <div class="chat-section">
-            <div class="chat-box" id="chat-box" data-user-img="{{ url_for('static', filename='img/male.PNG') }}" data-bot-img="{{ url_for('static', filename='img/dog.PNG') }}">
-                <!-- Messages will be appended here -->
+            {% block body %}
+            <div class="chat-box" id="chat-box">
+                <!-- Default messages or empty state -->
             </div>
+            {% endblock %}
             <div class="chat-input-container">
-                <input type="text" id="user-input" placeholder="Type a new message here...">
-                <button id="send-button">Send</button>
+                    <input type="hidden" name="chatId" id="chat-id" value="{{ chat_id }}">
+                    <input type="text" name="query" id="user-input" placeholder="Type a new message here...">
+                    <button type="submit" id="send-button">Send</button>
             </div>
         </div>
     </div>
@@ -45,7 +55,9 @@
             <p>Are you sure you want to logout?</p>
             <div class="popup-buttons">
                 <button id="cancel-button" class="popup-button cancel-button">No, Cancel</button>
-                <button id="confirm-button" class="popup-button confirm-button">Yes, Logout</button>
+                <form action="/logout" method="post" style="display: inline;">
+                    <button type="submit" class="popup-button confirm-button">Yes, Logout</button>
+                </form>
             </div>
         </div>
     </div>

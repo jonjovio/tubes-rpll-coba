@@ -1,88 +1,298 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const menuButton = document.getElementById('menu-button');
-    const sidebar = document.getElementById('sidebar');
-    const menuItem = document.getElementById('menu-items');
-    const userProfile = document.getElementById('user-profile');
-    const dropdownContent = document.getElementById('dropdown-content');
-    const logoutButton = document.getElementById('logout-button');
-    const popup = document.getElementById('popup');
-    const cancelButton = document.getElementById('cancel-button');
-    const confirmButton = document.getElementById('confirm-button');
-
-    menuButton.addEventListener('click', function () {
-        sidebar.classList.toggle('closed');
-        menuItem.classList.toggle('closed');
-        userProfile.classList.toggle('closed');
-        menuButton.classList.toggle('closed');
-    });
-
-    userProfile.addEventListener('click', function () {
-        userProfile.classList.toggle('show');
-    });
-
-    logoutButton.addEventListener('click', function () {
-        popup.style.display = 'flex';
-    });
-
-    cancelButton.addEventListener('click', function () {
-        popup.style.display = 'none';
-    });
-
-    confirmButton.addEventListener('click', function () {
-        // Add your logout logic here
-        alert('Logged out!');
-        popup.style.display = 'none';
-    });
-
-
-    loadChatItems();
-
-});
-
-document.getElementById('send-button').addEventListener('click', sendMessage);
-
-function sendMessage() {
-    const userInput = document.getElementById('user-input');
-    const message = userInput.value.trim();
-
-    if (message) {
-        appendMessage('user', message);
-        userInput.value = '';
-
-        // Simulate bot response (replace with actual AJAX/WebSocket call)
-        setTimeout(() => {
-            const botMessage = getBotResponse(message);
-            appendMessage('bot', botMessage);
-        }, 1000);
-    }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f0f0f0;
+    display: flex;
+    height: 100vh;
 }
 
-function appendMessage(sender, message) {
-    const chatBox = document.getElementById('chat-box');
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message', sender);
-
-    const profilePic = sender === 'user' ? '../img/male.png' : '../img/dog.png';
-
-    if (sender == 'bot') {
-        messageElement.innerHTML = `
-            <img src="${profilePic}" alt="${sender}">
-            <div class="content">${message}</div>
-        `;
-    } else {
-        messageElement.innerHTML = `
-            <div class="content">${message}</div>
-            <img src="${profilePic}" alt="${sender}">
-        `;
-    }
-
-    
-
-    chatBox.appendChild(messageElement);
-    chatBox.scrollTop = chatBox.scrollHeight;
+.chat-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: #FBEED7;
 }
 
-function getBotResponse(message) {
-    // Placeholder for actual bot response logic
-    return "This is a bot response.";
+.sidebar {
+    width: 25%;
+    background-color: #E9C49C;
+    padding: 20px;
+    display: flex;
+    margin: 10px;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 20px;
+    position: relative;
+    transition: transform 0.3s ease;
 }
+
+.sidebar.closed {
+    /* transform: translateX(-80%); */
+    width:5%;
+}
+
+.menu-button {
+    align-self: flex-end;
+    cursor: pointer;
+    font-size: 25px;
+}
+
+.menu-button.closed {
+    align-self: center;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    position: absolute; 
+    bottom: 20px; 
+    left: 30%;
+    transform: translateX(-30%);
+}
+
+.user-profile.closed {
+    display: none;
+}
+
+.user-profile img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+.menu-items {
+    width: 90%;
+    margin-top: 20px;
+    max-height: calc(100vh - 200px); /* Adjust based on your layout */
+    overflow-y: auto;
+}
+
+.menu-items.closed {
+    display: none;
+}
+
+.menu-item {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    /* background-color: #CD996A; */
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    border-radius: 10px;
+}
+
+.menu-item.new-chat {
+    background-color: #CD996A;
+}
+
+.menu-item.selected {
+    background-color: #ECB176;
+}
+
+.menu-item:hover {
+    background-color: #FBEED7;
+}
+
+.menu-item-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.trash-icon {
+    display: none;
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+}
+
+.menu-item-container .menu-item.selected + .trash-icon {
+    display: inline;
+    color: red;
+}
+
+
+/* START MENU LOGOUT & MANAGE PROFILE */
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #E9C49C;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 12px 16px;
+    z-index: 1;
+    bottom: 60px; /* Position it above the profile */
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 10px;
+    width: 90%;
+    text-align: center;
+}
+
+.dropdown-item {
+    background: none;
+    border: none;
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+    border-radius: 5px;
+}
+
+.dropdown-item:hover {
+    background-color: #CD996A;
+}
+
+.user-profile.show .dropdown-content {
+    display: block;
+}
+
+/* END MENU LOGOUT & MANAGE PROFILE */
+
+
+/* CHAT SECTION */
+
+.chat-section {
+    width: 70%;
+    background-color: #FBEED7;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0 auto;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.chat-input-container {
+    display: flex;
+    padding: 10px;
+    padding: 20px;
+    align-items: center;
+}
+
+.chat-input-container input {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #E0E0E0;
+    border-radius: 25px;
+    margin-right: 10px;
+}
+
+.chat-input-container button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #e8c3a3;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.chat-input-container button:hover {
+    background-color: #CD996A;
+}
+
+
+/* START MESSAGE SECTION */
+
+.message {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.message.user {
+    justify-content: flex-end;
+}
+
+.message.bot {
+    justify-content: flex-start;
+}
+
+.message .content {
+    max-width: 60%;
+    padding: 10px;
+    border-radius: 15px;
+    font-size: 16px;
+}
+
+.message.user .content {
+    background-color: #007BFF;
+    color: white;
+    border-top-right-radius: 0;
+}
+
+.message.bot .content {
+    background-color: #E0E0E0;
+    color: black;
+    border-top-left-radius: 0;
+}
+
+.message img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 0 10px;
+}
+
+/* END MESSAGE SECTION */
+
+
+/* START POPUP SECTION */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background: #FBEED7;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 400px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+}
+
+.popup-logo {
+    width: 100px;
+    margin-bottom: 10px;
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.popup-button {
+    padding: 10px 20px;
+    border: none;
+    margin: 0 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cancel-button, .confirm-button {
+    background-color: #CD996A;
+    color: white;
+}
+
+.cancel-button:hover, .confirm-button:hover {
+    background-color: #E9C49C;
+    color: black;
+}
+
+/* END POPUP SECTION */
